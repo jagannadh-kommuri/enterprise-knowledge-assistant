@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Incident Response",
+    "content": "# Incident response handbook \u2014 fictional demonstration data\n\nFor a severity one incident, the on-call engineer acknowledges the alert within five minutes and opens an incident channel. The incident commander coordinates investigation and publishes updates every fifteen minutes. The first priority is restoring service safely.\n\nA rollback requires the last known healthy release, a recorded incident identifier, and approval from the incident commander. After rollback, verify API error rates, request latency, and database connection health for ten minutes before closing the incident.\n\nA blameless postmortem is completed within three business days. Include the timeline, customer impact, root cause, contributing factors, and action items with owners and due dates. Never paste customer data or credentials into the incident channel.\n",
+    "visibility": "team"
+  },
+  {
+    "title": "Access Policy",
+    "content": "# Access and document policy \u2014 fictional demonstration data\n\nNew employees request application access through the service desk. Their manager approves the business need, and the platform team grants the least privileged role. Production access expires after thirty days unless renewed.\n\nTeam documents are searchable by readers and administrators. Administrator-only documents are visible only to administrators. Readers cannot upload or delete documents. An administrator must review document classification before upload.\n\nRotate service credentials after suspected exposure. Revoke the old credential, provision the replacement through the secret manager, update the service configuration, and verify the application before closing the security ticket.\n",
+    "visibility": "team"
+  }
+]

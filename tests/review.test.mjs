@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import test from 'node:test';
+const memory=()=>{const values=new Map();return{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k),clear:()=>values.clear()};};
+globalThis.localStorage=memory();globalThis.sessionStorage=memory();
+const code=await readFile(new URL('../review-preview/static/api.js',import.meta.url),'utf8');
+const {api}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const call=(p,b,method='POST')=>api(p,{method,body:JSON.stringify(b)});
+const login=role=>call('/login',{password:role});
+test('review role must be selected',async()=>{await assert.rejects(()=>api('/me'));});
+test('seed retrieval returns a real excerpt and citation',async()=>{await login('admin');const r=await call('/ask',{question:'incident rollback'});assert(r.sources.length);assert(r.answer.includes('healthy release'));assert(r.answer.includes('[1]'));assert.equal(r.tokens,0);});
+test('ingest, persist, retrieve and delete a new document',async()=>{await login('admin');const d=await call('/documents',{title:'Review test',content:'The fictional skylarkviolet policy says to review the application before deployment.',visibility:'team'});assert(localStorage.getItem('atlas-review-v1').includes('skylarkviolet'));assert((await call('/ask',{question:'skylarkviolet'})).sources.some(s=>s.document_id===d.id));await api('/documents/'+d.id,{method:'DELETE'});assert(!(await api('/documents')).some(s=>s.id===d.id));});
+test('reader simulation hides restricted excerpts and editing',async()=>{await login('reader');assert(!(await api('/documents')).some(d=>d.visibility==='admin'));assert.equal((await call('/ask',{question:'Violet Monsoon'})).sources.length,0);await assert.rejects(()=>call('/documents',{title:'x',content:'sample content',visibility:'team'}));await assert.rejects(()=>api('/metrics'));});
+test('no evidence produces no invented sources',async()=>{await login('admin');const r=await call('/ask',{question:'quasars astrophysics'});assert.equal(r.sources.length,0);assert(r.answer.includes('could not find enough evidence'));});
+test('rejects empty question and records actual review activity',async()=>{await assert.rejects(()=>call('/ask',{question:'the and for'}));const m=await api('/metrics');assert(m.requests>=4);assert.equal(m.tokens,0);await api('/logout');await assert.rejects(()=>api('/me'));});

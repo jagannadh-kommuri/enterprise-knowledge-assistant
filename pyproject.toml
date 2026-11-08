@@ -1,0 +1,7 @@
+[project]
+name = "atlas-knowledge-assistant"
+version = "1.0.0rc1"
+requires-python = ">=3.12,<3.13"
+
+[tool.vercel]
+entrypoint = "server:app"
