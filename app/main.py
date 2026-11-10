@@ -1,4 +1,7 @@
 """Atlas: a single-workspace knowledge assistant with explicit preview/AI modes."""
+import base64
+import io
+from pypdf import PdfReader
 import hashlib
 import hmac
 import json
@@ -112,6 +115,12 @@ class Document(BaseModel):
     visibility: str = Field(default='team', pattern='^(team|admin)$')
 
 
+class PDFDocument(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+    pdf_base64: str = Field(max_length=2800000)
+    visibility: str = Field(default="team", pattern="^(team|admin)$")
+
+
 class Question(BaseModel):
     question: str = Field(min_length=3, max_length=1500)
 
@@ -188,7 +197,7 @@ def create_app():
                 content_length = int(request.headers.get('content-length', '0'))
             except ValueError:
                 return JSONResponse({'detail': 'Invalid content length'}, status_code=400)
-            if content_length > 150000:
+            if content_length > (2900000 if request.url.path == '/api/documents/pdf' else 150000):
                 return JSONResponse({'detail': 'Request too large'}, status_code=413)
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -237,16 +246,52 @@ def create_app():
     def upload(body: Document, role=Depends(admin)):
         if not body.content.strip() or not body.title.strip():
             raise HTTPException(422, 'Title and content must contain text')
-        parts = chunk(body.content)
+        return save_document(body.title, body.visibility, [(t, None) for t in chunk(body.content)])
+
+    def save_document(title, visibility, sections):
+        parts = [t for t, page in sections]
         vectors, tokens = provider.embed(parts)
         doc_id = secrets.token_hex(12)
         with db() as con:
             con.execute("UPDATE meta SET value=value WHERE key='index_id'")
             if con.execute('SELECT COUNT(*) AS count FROM documents').fetchone()['count'] >= 100:
                 raise HTTPException(409, 'Workspace limit: 100 documents. Delete unused documents.')
-            con.execute('INSERT INTO documents VALUES(?,?,?,?)', (doc_id, body.title.strip(), body.visibility, time.time()))
-            con.executemany('INSERT INTO chunks VALUES(?,?,?,?,?)', [(secrets.token_hex(12), doc_id, i, t, json.dumps(v)) for i, (t, v) in enumerate(zip(parts, vectors))])
+            con.execute('INSERT INTO documents VALUES(?,?,?,?)', (doc_id, title.strip(), visibility, time.time()))
+            con.executemany('INSERT INTO chunks VALUES(?,?,?,?,?)', [(secrets.token_hex(12), doc_id, i, t, json.dumps({'embedding':v,'page':sections[i][1]})) for i, (t, v) in enumerate(zip(parts, vectors))])
         return {'id': doc_id, 'chunks': len(parts), 'embedding_tokens': tokens}
+
+    @app.post('/api/documents/pdf', status_code=201)
+    def upload_pdf(body: PDFDocument, role=Depends(admin)):
+        if not body.title.strip():
+            raise HTTPException(422, 'Title must contain text')
+        try:
+            raw = base64.b64decode(body.pdf_base64, validate=True)
+            if len(raw) > 2000000:
+                raise HTTPException(413, 'PDF limit: 2 MB')
+            if not raw.startswith(b'%PDF-'):
+                raise ValueError()
+            pdf = PdfReader(io.BytesIO(raw))
+            if pdf.is_encrypted:
+                raise HTTPException(422, 'Encrypted PDFs are not supported')
+            if not 1 <= len(pdf.pages) <= 100:
+                raise HTTPException(422, 'PDF limit: 100 pages')
+            sections, total = [], 0
+            for number, page in enumerate(pdf.pages, 1):
+                stream = page.get_contents()
+                if stream is not None and len(stream.get_data()) > 5000000:
+                    raise HTTPException(422, 'PDF page is too complex')
+                text = page.extract_text() or ''
+                total += len(text)
+                if total > 100000:
+                    raise HTTPException(422, 'Extracted text limit: 100,000 characters')
+                if not text.strip():
+                    raise HTTPException(422, 'A page has no extractable text. Use a text-based PDF or apply OCR first.')
+                sections.extend((t, number) for t in chunk(text))
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(422, 'Could not read this PDF. Upload a valid text-based PDF.')
+        return save_document(body.title, body.visibility, sections)
 
     @app.delete('/api/documents/{doc_id}')
     def delete(doc_id: str, role=Depends(admin)):
@@ -268,14 +313,16 @@ def create_app():
                 rows = con.execute("SELECT c.*,d.title FROM chunks c JOIN documents d ON c.document_id=d.id WHERE (?='admin' OR d.visibility='team')", (role,)).fetchall()
             ranked = []
             for row in rows:
-                vec = json.loads(row['vector'])
+                stored = json.loads(row['vector'])
+                page_number = stored.get('page') if isinstance(stored, dict) else None
+                vec = stored['embedding'] if isinstance(stored, dict) else stored
                 if len(vec) != len(query):
                     raise HTTPException(503, 'Index dimension mismatch. Rebuild the document index.')
                 score = sum(a*b for a,b in zip(query,vec))/(math.sqrt(sum(a*a for a in query))*math.sqrt(sum(b*b for b in vec)) or 1)
                 # Prevent hash collisions alone from counting as evidence in preview.
                 overlap = bool(set(words(body.question)) & set(words(row['text'])))
                 if score >= (0.12 if provider.mode == 'preview' else 0.25) and (provider.mode != 'preview' or overlap):
-                    ranked.append({'title': row['title'], 'document_id': row['document_id'], 'chunk': row['position']+1, 'text': row['text'], 'score': round(score,4)})
+                    ranked.append({'title': row['title'], 'document_id': row['document_id'], 'chunk': row['position']+1, 'page': page_number, 'text': row['text'], 'score': round(score,4)})
             sources = sorted(ranked, key=lambda r:r['score'], reverse=True)[:4]
             if sources:
                 answer, generated = provider.answer(body.question, sources)

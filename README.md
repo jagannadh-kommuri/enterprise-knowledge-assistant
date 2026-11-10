@@ -84,3 +84,6 @@ Citation-range validation does not prove factual entailment. Prompt isolation an
 
 ## Test documents
 See [sample_docs/README.md](sample_docs/README.md) for upload instructions, visibility settings, questions and expected answers. Local tests: 21 passed, 1 PostgreSQL test skipped; 6 browser-adapter tests passed. Live Azure and cloud deployment are not verified.
+
+## PDF page citations
+See [PDF support and test status](docs/PDF_CITATIONS.md). Text-based PDFs now retain physical page numbers in source cards and copied references.
