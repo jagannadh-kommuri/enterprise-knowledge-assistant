@@ -1,7 +1,14 @@
 [project]
 name = "atlas-knowledge-assistant"
-version = "1.0.0rc1"
+version = "1.0.0rc2"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi==0.121.0",
+  "uvicorn==0.38.0",
+  "httpx==0.28.1",
+  "psycopg[binary]==3.2.13",
+  "pypdf==6.4.0",
+]
 
 [tool.vercel]
 entrypoint = "server:app"
