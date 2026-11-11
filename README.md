@@ -1,6 +1,8 @@
 # Atlas — Enterprise Knowledge Assistant
 
-**Release candidate 1 · ready for interface review and configured for a Vercel deployment.**
+**Ask a question. See the source.**
+
+Atlas runs on [Vercel](https://enterprise-knowledge-assistant-coral.vercel.app/) behind a workspace password. The live deployment uses extractive document search with source citations.
 
 A personal project by Jagannadh Kommuri. Atlas is a Python/FastAPI application with a custom responsive research interface, document ingestion, role-filtered retrieval, source-linked answers and measured usage. The same interface is used by the temporary browser-local review and by this full backend; only the API adapter and review configuration differ.
 
@@ -11,11 +13,11 @@ A personal project by Jagannadh Kommuri. Atlas is a Python/FastAPI application w
 | Custom research desk, library, source panel, upload/delete dialogs | Implemented |
 | Authentication, reader/admin permissions, vector retrieval, metrics | Implemented and tested locally |
 | Persistent shared sessions and request limits | Implemented in SQL; tested across local app instances |
-| PostgreSQL deployment adapter, Vercel entrypoint/config | Included; live PostgreSQL/Vercel verification pending |
+| PostgreSQL deployment adapter, Vercel entrypoint/config | Deployed with Neon PostgreSQL; live PDF and TXT uploads verified |
 | Azure embedding/chat integration | Included; provider-contract tests use simulated responses; real Azure calls pending |
 | Qdrant, Chroma, LangChain, Semantic Kernel | Not implemented in this release |
 | GitHub | Private testing repository; public release pending |
-| Independent cloud deployment | Pending live PostgreSQL and Azure setup |
+| Independent cloud deployment | Vercel deployment verified in extractive mode |
 
 Do not describe the preview as a live AI deployment. No traffic, 500+ daily requests, SLA, or performance-improvement claims are made.
 
@@ -48,7 +50,7 @@ In `.env`, set `AI_MODE=azure`, your Azure resource root endpoint, API key, chat
 
 Follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). The package includes `server.py`, `pyproject.toml`, `vercel.json`, a PostgreSQL adapter and an initialization command. **Do not deploy with a writable local SQLite file on Vercel.** The app rejects Vercel startup without `DATABASE_URL`.
 
-Before calling it production-ready, configure a managed PostgreSQL database and Azure deployments, run the PostgreSQL integration test, deploy to Vercel, and complete the live acceptance checklist. Credentials and host deployment have not been supplied/tested here.
+For a new deployment, configure managed PostgreSQL and complete the live acceptance checklist. Azure model settings are required for generated answers. The dedicated PostgreSQL integration test and live Azure calls remain unverified.
 
 ## Verification
 
@@ -76,14 +78,14 @@ For real database verification, provide a dedicated `TEST_DATABASE_URL` and reru
 
 The research desk keeps questions and findings in the main column and their supporting excerpts in a side panel. Mobile layouts use an accessible navigation toggle and stack the source panel beneath the answer. Real-device iOS Safari/Android Chrome checks remain part of owner review.
 
-This is a bounded portfolio application: one shared workspace, two role passwords, one-hour opaque sessions stored as hashes, 100 text/Markdown documents maximum, exact vector scanning, and a versioned grounding prompt. No enterprise SSO, per-person permissions, multi-tenancy, PDF/OCR, background ingestion queue, distributed vector index, or compliance certification is claimed.
+This is a bounded portfolio application: one shared workspace, two role passwords, one-hour opaque sessions stored as hashes, 100 documents maximum, with text-based PDF, TXT, and Markdown support, exact vector scanning, and a versioned grounding prompt. No enterprise SSO, per-person permissions, multi-tenancy, OCR for scanned PDFs, background ingestion queue, distributed vector index, or compliance certification is claimed.
 
 Changing a workspace password invalidates existing sessions for that role. Sessions, documents, metrics and request counters persist in the deployment database. Rate limits use fixed one-minute windows, not a rolling-window global capacity guarantee. Configure TLS on PostgreSQL and your host, protect environment secrets, and use fictional content for public demonstrations.
 
 Citation-range validation does not prove factual entailment. Prompt isolation and absence of action tools reduce risk without proving prompt-injection immunity. Retrieval thresholds and chunk sizes are initial settings; evaluate relevance on representative questions before using real business material.
 
 ## Test documents
-See [sample_docs/README.md](sample_docs/README.md) for upload instructions, visibility settings, questions and expected answers. Local tests: 21 passed, 1 PostgreSQL test skipped; 6 browser-adapter tests passed. Live Azure and cloud deployment are not verified.
+See [sample_docs/README.md](sample_docs/README.md) for upload instructions, visibility settings, questions and expected answers. See the [PDF support and test status](docs/PDF_CITATIONS.md) for the PDF-specific checks.
 
 ## PDF page citations
 See [PDF support and test status](docs/PDF_CITATIONS.md). Text-based PDFs now retain physical page numbers in source cards and copied references.
