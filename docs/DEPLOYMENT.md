@@ -2,9 +2,9 @@
 
 The interface review is temporary and browser-local. This guide deploys the real FastAPI backend independently, with no ChatGPT authentication.
 
-## 1. Review, then upload the code
+## 1. Connect the private repository
 
-After owner review, create a private `enterprise-knowledge-assistant` repository under `jagannadh-kommuri`. Upload this folder's contents at the repository root. Do not upload `.env`, `.venv/`, `data/`, caches, databases, credentials or personal documents. The owner authorized private GitHub upload. Public release remains gated on live acceptance testing.
+The [Atlas deployment](https://enterprise-knowledge-assistant-coral.vercel.app/) uses the private `jagannadh-kommuri/enterprise-knowledge-assistant` repository. For a new deployment, connect the repository root and keep `.env`, `.venv/`, `data/`, caches, databases, credentials, and personal documents out of Git.
 
 ## 2. Provision PostgreSQL
 
@@ -68,7 +68,7 @@ The PostgreSQL integration test creates a disposable schema with a random name, 
 - [ ] App sign-in uses the workspace password without ChatGPT login.
 - [ ] The mode badge matches the intended mode.
 - [ ] Upload two fictional documents; ask relevant questions; inspect citations.
-- [ ] Confirm real Azure token usage on a successful AI question.
+- [ ] If using Azure mode, confirm real Azure token usage on a successful AI question.
 - [ ] Reader cannot list/retrieve admin-only content or call mutation/metrics endpoints.
 - [ ] Sign in, redeploy/restart, and confirm session plus documents persist.
 - [ ] Logout invalidates the session; password change revokes the role's sessions.
@@ -76,7 +76,7 @@ The PostgreSQL integration test creates a disposable schema with a random name, 
 - [ ] Check loading, empty, invalid-input and provider-error states.
 - [ ] Confirm `.env` and credentials are absent from GitHub and browser network payloads.
 
-Do not describe the full app as verified live until these checks pass. Backend integration and cloud deployment remain unverified in the delivered release candidate.
+The existing Vercel deployment has been checked for administrator sign-in, PDF and TXT uploads, PDF page citations, document persistence after a reload, and a question with insufficient evidence. Use the remaining checklist for broader release verification.
 
 ## Alternative Docker hosting
 
