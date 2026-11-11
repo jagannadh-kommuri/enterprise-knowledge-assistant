@@ -2,9 +2,9 @@
 
 ## Interface
 
-- [ ] Research desk: typography, spacing, contrast and language feel right.
+- [ ] Research desk: confirm the source panel reads **Ask a question. See the source.** and the sign-in page identifies Atlas as a personal knowledge workspace.
 - [ ] Document library: title search, visibility labels and empty state are clear.
-- [ ] Upload dialog: text/Markdown import and pasted content are comfortable to use.
+- [ ] Upload dialog: PDF, TXT, and Markdown import and pasted content are comfortable to use.
 - [ ] Ask a question; inspect the research note and click its numbered source.
 - [ ] Ask an unrelated question; check evidence-insufficiency behavior.
 - [ ] Open the mobile navigation; switch views on your actual phone.
@@ -26,4 +26,4 @@
 - [ ] Configure Azure model deployments and verify real calls.
 - [ ] Deploy the reviewed commit to Vercel and complete the live checklist.
 
-No user GitHub upload or Vercel deployment has occurred. Cloud credentials are not embedded in this package.
+The private GitHub repository and password-protected Vercel deployment are available for review. Cloud credentials are managed through environment variables.
