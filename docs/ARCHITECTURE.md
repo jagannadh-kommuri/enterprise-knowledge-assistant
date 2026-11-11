@@ -2,7 +2,7 @@
 
 ## System flow
 
-Administrator → authenticated API → validated text/Markdown → overlapping chunks → Azure embeddings (or explicitly labeled local token-hash vectors) → SQL transaction with document visibility and vectors.
+Administrator → authenticated API → validated text/Markdown or text-based PDF → overlapping chunks, with physical page numbers retained for PDFs → Azure embeddings (or explicitly labeled local token-hash vectors) → SQL transaction with document visibility and vectors.
 
 Question → hashed session lookup → shared SQL rate counter → query embedding → select only role-visible chunks → exact cosine scan → top supporting chunks → versioned grounding prompt → Azure chat completion (or extractive answer) → citation-range validation → answer with source excerpts and measured metadata.
 
