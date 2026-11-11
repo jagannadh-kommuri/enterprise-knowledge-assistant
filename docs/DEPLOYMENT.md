@@ -1,10 +1,10 @@
 # Vercel deployment — release candidate 1
 
-The interface review is temporary and browser-local. This guide deploys the real FastAPI backend independently, with no ChatGPT authentication.
+The interface preview runs locally in the browser. This guide covers deploying the FastAPI backend to Vercel.
 
-## 1. Connect the private repository
+## 1. Connect the repository
 
-The [Atlas deployment](https://enterprise-knowledge-assistant-coral.vercel.app/) uses the private `jagannadh-kommuri/enterprise-knowledge-assistant` repository. For a new deployment, connect the repository root and keep `.env`, `.venv/`, `data/`, caches, databases, credentials, and personal documents out of Git.
+The [Atlas deployment](https://enterprise-knowledge-assistant-coral.vercel.app/) uses the `jagannadh-kommuri/enterprise-knowledge-assistant` repository. For a new deployment, connect the repository root and keep `.env`, `.venv/`, `data/`, caches, databases, credentials, and personal documents out of Git.
 
 ## 2. Provision PostgreSQL
 
@@ -65,7 +65,7 @@ The PostgreSQL integration test creates a disposable schema with a random name, 
 ## 6. Live acceptance checklist
 
 - [ ] `/health` returns `{"status":"ok"}`.
-- [ ] App sign-in uses the workspace password without ChatGPT login.
+- [ ] App sign-in accepts the configured workspace password.
 - [ ] The mode badge matches the intended mode.
 - [ ] Upload two fictional documents; ask relevant questions; inspect citations.
 - [ ] If using Azure mode, confirm real Azure token usage on a successful AI question.

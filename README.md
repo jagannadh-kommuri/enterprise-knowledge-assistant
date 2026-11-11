@@ -16,7 +16,7 @@ A personal project by Jagannadh Kommuri. Atlas is a Python/FastAPI application w
 | PostgreSQL deployment adapter, Vercel entrypoint/config | Deployed with Neon PostgreSQL; live PDF and TXT uploads verified |
 | Azure embedding/chat integration | Included; provider-contract tests use simulated responses; real Azure calls pending |
 | Qdrant, Chroma, LangChain, Semantic Kernel | Not implemented in this release |
-| GitHub | Private testing repository; public release pending |
+| GitHub | Public source repository; workspace sign-in required |
 | Independent cloud deployment | Vercel deployment verified in extractive mode |
 
 Do not describe the preview as a live AI deployment. No traffic, 500+ daily requests, SLA, or performance-improvement claims are made.

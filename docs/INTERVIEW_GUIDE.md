@@ -1,10 +1,6 @@
-# Explain the project from what you actually did
+# Atlas project walkthrough
 
-## Accurate starting narrative
-
-“I built and tested a portfolio knowledge-assistant prototype with AI coding assistance. It ingests text documents, retrieves relevant chunks, and returns source-backed answers. I reviewed the request flow and tested authorization boundaries. Local preview uses extractive search; Azure mode uses embedding and chat deployments. I can show which parts I tested locally and which cloud checks I completed.”
-
-Only say “deployed” after you have a working independent URL and have tested it. Only say “used Azure AI” after successful real embedding and chat requests. Do not present this new project as evidence of past employment, past customer usage, or previous production scale. Do not claim Qdrant, Chroma, LangChain or Semantic Kernel experience from this implementation; they are not used here.
+Atlas is a personal knowledge workspace maintained by Jagannadh Kommuri. It indexes uploaded documents, retrieves relevant excerpts, and cites the physical page for PDFs. The live workspace uses extractive search. Azure OpenAI is an optional integration for embeddings and generated answers.
 
 ## A five-minute demo
 
@@ -28,17 +24,6 @@ Only say “deployed” after you have a working independent URL and have tested
 - **Retries:** capped retries with backoff on provider trouble; they may duplicate billable calls, so a real system needs stronger budgets and observability.
 - **Evaluation:** measure retrieval recall@k, citation correctness, no-answer behavior, role isolation, latency percentiles, and cost per query on representative examples.
 
-## STAR material you can develop after hands-on review
+## Discuss the implementation
 
-Situation: a portfolio prototype to explore searching internal documentation.
-Task: build a demonstrable, access-controlled question-answer flow.
-Action: describe your actual design reviews, changes, debugging and test execution.
-Result: quote actual test outcomes, observed timings and a live URL only when verified. The package has no production traffic results.
-
-## Resume alignment
-
-The current resume lists Azure OpenAI, Semantic Kernel, LangChain, Qdrant/Chroma and 500+ daily requests. This new review build does not substantiate that whole statement. Keep prior work claims tied to evidence from that work; describe this implementation separately as a personal project. After deployment, use a precise bullet such as:
-
-“Built a Python/FastAPI knowledge-assistant prototype with document ingestion, role-filtered vector retrieval, source citations, Azure OpenAI integration, and automated API tests; deployed on [actual host] after verifying the end-to-end flow.”
-
-Edit that statement to match the mode and hosting you actually verified.
+Explain the PDF ingestion flow, how page numbers are preserved, and how the backend filters documents by role before retrieval. Use verified test results and a working deployment URL when describing the project. Describe any optional model integration according to the environment you tested.
